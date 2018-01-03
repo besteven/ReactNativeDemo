@@ -1,25 +1,40 @@
 import React, { Component } from 'react';
-import { StatusBar } from 'react-native';
-import { DrawerNavigator } from 'react-navigation';
+import { StatusBar, View } from 'react-native';
+import { TabNavigator } from 'react-navigation';
 
-import Category from './src/components/Category/Category';
-import Main from './src/components/Main/Main';
+import Shop from './src/components/Shop/Shop';
+import Cart from './src/components/Cart/Cart';
+import Search from './src/components/Search/Search';
+import Setting from './src/components/Setting/Setting';
+import Header from './src/components/Header';
 
 StatusBar.setHidden(true);
 
-const AppShop = DrawerNavigator(
+const AppShop = TabNavigator(
   {
-    Main: { 
-      screen: Main 
+    Shop: { 
+      screen: Shop,
     },
-    Category: { 
-      screen: Category 
+    Cart: { 
+      screen: Cart 
+    },
+    Search: { 
+      screen: Search 
+    },
+    Setting: { 
+      screen: Setting 
     }
+  },{
+    tabBarPosition: 'bottom'
   }
 );
 
 export default class App extends Component {
   render() {
-    return <AppShop />;
+    return (
+      <View style={{flex:1}}>
+        <AppShop />
+      </View>
+    );
   }
 }
