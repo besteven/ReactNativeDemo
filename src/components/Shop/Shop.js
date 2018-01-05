@@ -15,15 +15,15 @@ const Main = StackNavigator({
   },
   Category: {
     screen: Category,
-    navigationOptions: {
-      title: 'Category',
-    },
+    navigationOptions: ({navigation}) => ({
+      title: `${navigation.state.params.name}`,
+    }),
   },
   Product: {
     screen: Product,
-    navigationOptions: {
-      title: 'Product',
-    },
+    navigationOptions: ({navigation}) => ({
+      title: `${navigation.state.params.name}`,
+    }),
   }
 });
 
