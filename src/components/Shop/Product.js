@@ -2,23 +2,37 @@ import React, { Component } from 'react';
 import { View, Text, Button, Image } from 'react-native';
 
 export default class Product extends Component {
+  constructor(props) {
+    super(props);
+    this.state=({
+      product: ''
+    });
+    let { item } = this.props.navigation.state.params;
+    let { token } = this.props.navigation.state.params;
+    fetch(`http://mgs.arrowhitech.net/service/rest/V1/products/${item.sku}`,{
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + JSON.parse(token),
+      }
+    }).then((responseProduct) => {
+      let productJson = JSON.parse(responseProduct._bodyText);
+      this.setState({
+        product: productJson
+      })
+    });
+  }
   render() {
-    const { item } = this.props.navigation.state.params;
-    var stock = 'In Stock';
-    var stockColor = 'limegreen';
-    if (item.stock == 0) {
-      stock = 'Out Stock';
-      stockColor = 'red';
-    }
+    
+    let product = this.state.product;
     return (
       <View style={{ flex: 1,}}>
-        <View style={{ flex: 1, alignItems: 'center' }}>
-          <Image source={{ uri: item.image }} style={{ width: 180, height: 180 }} />
-        </View>
+        
         <View style={{ flex: 2, alignItems: 'center' }}>
-          <Text>{item.name}</Text>
-          <Text style={{ fontWeight: 'bold' }}>${item.price}</Text>
-          <Text style={{ color: stockColor }}>{stock}</Text>
+          <Text>Product Name: {product.name}</Text>
+          <Text>SKU: {product.sku}</Text>
+          <Text>Price: {product.price}</Text>
         </View>
       </View>
     );

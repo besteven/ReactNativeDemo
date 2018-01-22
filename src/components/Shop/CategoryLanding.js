@@ -1,11 +1,56 @@
 import React, { Component } from 'react';
-import { View, Text, Button, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { View, Text, Button, TouchableOpacity, StyleSheet, Image, FlatList } from 'react-native';
 
 export default class CategoryLanding extends Component {
-  _onPressCategory = (name) => {
-    const { navigate } = this.props.navigation;
-    navigate('Category', { name });
+  constructor(){
+    super();
+    this.state=({
+      categories: [],
+      token: ''
+    });
+    try{
+      let account = {
+        'username': 'admin',
+        'password': 'admin999'
+      };
+      fetch('http://mgs.arrowhitech.net/service/rest/V1/integration/admin/token',{
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: 'admin',
+          password: 'admin999',
+        })
+      }).then((response) => {
+        let token = response._bodyText;
+        this.setState({ token });
+        fetch('http://mgs.arrowhitech.net/service/rest/V1/categories',{
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + JSON.parse(token),
+          }
+        }).then((responseCategories) => {
+          let categoryJson = JSON.parse(responseCategories._bodyText);
+          this.setState({
+            categories: categoryJson.children_data
+          });
+        });
+      });
+    } catch (error) {
+      console.error(error);
+    }
   }
+  
+  _onPressCategory = (item) => {
+    const { navigate } = this.props.navigation;
+    let name = item.name;
+    navigate('Category', { 'name': name, 'item': item, 'token': this.state.token });
+  }
+  
   render() {
     return (
       <View style={{ flex: 1, backgroundColor: "white" }}>
@@ -19,33 +64,21 @@ export default class CategoryLanding extends Component {
           </View>
         </View>
         <View style={styles.wrapper}>
-          <TouchableOpacity style={styles.item} onPress={(name) => this._onPressCategory('Boxes')}>
-            <Image source={require('./../../images/cate_boxes.png')} style={styles.itemImage} />
-            <Text style={styles.itemText}>Boxes</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.item} onPress={(name) => this._onPressCategory('Moving Packs')}>
-            <Image source={require('./../../images/cate_moving_pack.png')} style={styles.itemImage} />
-            <Text style={styles.itemText}>Moving Packs</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.item} onPress={(name) => this._onPressCategory('Packing Materials')}>
-            <Image source={require('./../../images/cate_packing_materials.png')} style={styles.itemImage} />
-            <Text style={styles.itemText}>Packing Materials</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={styles.wrapper}>
-          <TouchableOpacity style={styles.item} onPress={(name) => this._onPressCategory('Wine Storage & Transport')}>
-            <Image source={require('./../../images/cate_wine.png')} style={styles.itemImage} />
-            <Text style={styles.itemText}>Wine Storage & Transport</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.item} onPress={(name) => this._onPressCategory('TV\'s')}>
-            <Image source={require('./../../images/cate_tv.png')} style={styles.itemImage} />
-            <Text style={styles.itemText}>TV's</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.item} onPress={(name) => this._onPressCategory('Moving Product')}>
-            <Image source={require('./../../images/cate_moving_product.png')} style={styles.itemImage} />
-            <Text style={styles.itemText}>Moving Product</Text>
-          </TouchableOpacity>
-        </View>
+
+          <FlatList
+            data={this.state.categories}
+            numColumns={3}
+            renderItem={({ item, index }) => {
+              return (
+                <TouchableOpacity onPress={(name) => this._onPressCategory(item)}>
+                  <Text style={styles.itemText}>{item.name} - {item.product_count}</Text>
+                </TouchableOpacity>
+              );
+            }}
+            keyExtractor={(item, index) => item.id}
+          >
+          </FlatList>
+        </View>  
       </View>
     );
   }
